@@ -2,9 +2,25 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Room, Topic
 from .forms import RoomForm
+from django.contrib import messages
+from django.contrib.auth.models import User
 from django.db.models import Q
 # Create your views here.
 
+
+def loginPage(request):
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(username=username)
+        except:
+            messages.error(request, 'User does not exist')
+
+    context = {}
+    return render(request, 'base/login_register.html', context)
 
 def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
@@ -16,8 +32,9 @@ def home(request):
         )
 
     topics = Topic.objects.all()
+    room_count = rooms.count()
 
-    context = {'rooms':rooms, 'topics': topics}
+    context = {'rooms':rooms, 'topics': topics, 'room_count': room_count}
     return render(request, 'base/home.html', context)
 
 def room(request, pk):
